@@ -1,0 +1,14 @@
+# Ignore Gradle caches
+.gradle/
+*.bin
+*.marker
+
+# Ignore build folders
+/build/
+
+# VS Code settings
+.vscode/
+
+# System files
+*.log
+*.tmp
