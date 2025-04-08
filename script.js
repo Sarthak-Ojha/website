@@ -1,12 +1,60 @@
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+  // Initialize header once
+  const header = document.querySelector('header');
+  
+  // Mobile navigation setup
+  const mobileNavToggle = document.createElement('button');
+  mobileNavToggle.className = 'mobile-nav-toggle';
+  mobileNavToggle.setAttribute('aria-label', 'Toggle navigation menu');
+  mobileNavToggle.innerHTML = '<span></span><span></span><span></span>';
+  
+  const mobileNavOverlay = document.createElement('div');
+  mobileNavOverlay.className = 'mobile-nav-overlay';
+  mobileNavOverlay.id = 'mobileNavOverlay';
+  
+  // Add elements to the DOM
+  if (header) {
+    header.appendChild(mobileNavToggle);
+  }
+  document.body.appendChild(mobileNavOverlay);
+  
+  const navMenu = document.querySelector('nav ul');
+  
+  // Toggle navigation menu
+  mobileNavToggle.addEventListener('click', function() {
+    mobileNavToggle.classList.toggle('open');
+    navMenu.classList.toggle('open');
+    mobileNavOverlay.classList.toggle('active');
+    document.body.style.overflow = navMenu.classList.contains('open') ? 'hidden' : '';
+  });
+  
+  // Close menu when clicking overlay
+  mobileNavOverlay.addEventListener('click', function() {
+    mobileNavToggle.classList.remove('open');
+    navMenu.classList.remove('open');
+    mobileNavOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+  
   // Smooth scrolling for navigation links
   document.querySelectorAll('nav a').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
       e.preventDefault();
-      document.querySelector(this.getAttribute('href')).scrollIntoView({
-        behavior: 'smooth'
-      });
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+      
+      // Close menu when clicking a nav link (on mobile)
+      if (window.innerWidth <= 992) {
+        mobileNavToggle.classList.remove('open');
+        navMenu.classList.remove('open');
+        mobileNavOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
     });
   });
 
@@ -96,21 +144,22 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Parallax effect for header with better performance
-  const header = document.querySelector('header');
   let ticking = false;
   
-  window.addEventListener('scroll', function() {
+  function optimizeScroll() {
     if (!ticking) {
       window.requestAnimationFrame(function() {
         const offset = window.pageYOffset;
-        if (header) {
+        if (header && window.innerWidth > 768) { // Only apply parallax on non-mobile
           header.style.backgroundPositionY = offset * 0.4 + 'px';
         }
         ticking = false;
       });
       ticking = true;
     }
-  });
+  }
+  
+  window.addEventListener('scroll', optimizeScroll);
   
   // Add a subtle hover effect to the profile image
   const profileImg = document.querySelector('.profile img');
@@ -125,32 +174,35 @@ document.addEventListener('DOMContentLoaded', function() {
       this.style.boxShadow = '';
     });
   }
-  document.addEventListener('DOMContentLoaded', function() {
-    const navToggle = document.getElementById('navToggle');
-    const sideNav = document.getElementById('sideNav');
-    const navOverlay = document.getElementById('navOverlay');
+  
+  // Add improved touch interactions for mobile
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    const touchItems = document.querySelectorAll('.project-item, .skills-category li, .contact-card');
     
-    // Toggle navigation menu
-    navToggle.addEventListener('click', function() {
-      sideNav.classList.toggle('open');
-      navOverlay.classList.toggle('active');
+    touchItems.forEach(item => {
+      item.addEventListener('touchstart', function() {
+        this.classList.add('touch-active');
+      }, {passive: true});
+      
+      item.addEventListener('touchend', function() {
+        this.classList.remove('touch-active');
+      }, {passive: true});
     });
-    
-    // Close menu when clicking overlay
-    navOverlay.addEventListener('click', function() {
-      sideNav.classList.remove('open');
-      navOverlay.classList.remove('active');
-    });
-    
-    // Close menu when clicking a nav link (on mobile)
-    const navLinks = document.querySelectorAll('nav a');
-    navLinks.forEach(link => {
-      link.addEventListener('click', function() {
-        if (window.innerWidth < 992) {
-          sideNav.classList.remove('open');
-          navOverlay.classList.remove('active');
-        }
-      });
-    });
+  }
+  
+  // Add resize handler for better mobile performance
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      // Reset any mobile-specific states when resizing to desktop
+      if (window.innerWidth > 992) {
+        mobileNavToggle.classList.remove('open');
+        navMenu.classList.remove('open');
+        mobileNavOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }, 250);
   });
+
 });
