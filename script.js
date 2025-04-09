@@ -143,14 +143,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Parallax effect for header with better performance
   let ticking = false;
   
   function optimizeScroll() {
     if (!ticking) {
       window.requestAnimationFrame(function() {
         const offset = window.pageYOffset;
-        if (header && window.innerWidth > 768) { // Only apply parallax on non-mobile
+        if (header && window.innerWidth > 768) {
           header.style.backgroundPositionY = offset * 0.4 + 'px';
         }
         ticking = false;
@@ -189,13 +188,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }, {passive: true});
     });
   }
-  
-  // Add resize handler for better mobile performance
+
   let resizeTimer;
   window.addEventListener('resize', function() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function() {
-      // Reset any mobile-specific states when resizing to desktop
+      
       if (window.innerWidth > 992) {
         mobileNavToggle.classList.remove('open');
         navMenu.classList.remove('open');
